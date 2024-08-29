@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CandyMachine {
+  address     String   @unique
+  id          Int      @id @default(autoincrement())
+  wallet      String   @unique
+  machineName String
+  artistName  String
+  createdAt   DateTime @default(now())
+}
