@@ -8,6 +8,10 @@ A licensing platform that relies on solana to issue
 
 for visual art and photography. (soon for music)
 
+# Architecture
+
+![image](/draw.png)
+
 # Setting Up
 
 ## database
