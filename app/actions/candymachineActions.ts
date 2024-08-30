@@ -49,17 +49,17 @@ export async function fetchAllCandyMachinesFromDb() {
 
 export async function fetchCandyMachineByWallet(wallet: PublicKey) {
 	try {
-		const candyMachine = await prisma.candyMachine.findUnique({
+		const candyMachines = await prisma.candyMachine.findMany({
 			where: {
 				wallet,
 			},
 		});
 
-		if (!candyMachine) {
+		if (!candyMachines) {
 			throw new Error("Candy Machine not found");
 		}
 
-		return candyMachine;
+		return candyMachines;
 	} catch (error) {
 		throw new Error(`Failed to fetch candy machine: ${error}`);
 	}

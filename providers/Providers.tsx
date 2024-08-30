@@ -26,7 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
 	const queryEnv = searchParams.get("env");
 	const [client] = useState(new QueryClient());
 	const [env, setEnv] = useState<Env>(
-		queryEnv === "mainnet" || queryEnv === "devnet" ? queryEnv : "mainnet"
+		queryEnv === "devnet" || queryEnv === "mainnet" ? queryEnv : "devnet"
 	);
 	const wallets = useMemo(
 		() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],

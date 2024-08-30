@@ -4,6 +4,7 @@ import { useAudioPlayer } from "react-use-audio-player";
 import { useEffect } from "react";
 export interface NftCardProps {
 	id: string;
+	description: string;
 	imageUrl?: string;
 	title: string;
 	artist: string;
@@ -12,7 +13,7 @@ export interface NftCardProps {
 import { IconPlayerPlay, IconPlayerPause } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 export default function NftCard(props: NftCardProps) {
-	const { imageUrl, title, action } = props;
+	const { imageUrl, title, action, description } = props;
 	console.log(typeof action);
 
 	return (
@@ -26,7 +27,7 @@ export default function NftCard(props: NftCardProps) {
 			</figure>
 			<div className="card-body">
 				<h2 className="card-title uppercase font-bold">{title}</h2>
-
+				<p>{description}</p>
 				<div className="card-actions justify-start flex flex-col">
 					<Button className="btn btn-primary" onClick={action}>
 						License For Use

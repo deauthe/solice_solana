@@ -6,6 +6,7 @@ import {
 	percentAmount,
 	some,
 	createGenericFileFromBrowserFile,
+	sol,
 } from "@metaplex-foundation/umi";
 import {
 	addConfigLines,
@@ -41,7 +42,6 @@ export async function mintNft(props: MintCmProps) {
 		"hello"
 	);
 	const nftMint = generateSigner(umi);
-	const signer = umi.identity;
 	try {
 		await transactionBuilder()
 			.add(setComputeUnitLimit(umi, { units: 800_000 }))
@@ -49,6 +49,7 @@ export async function mintNft(props: MintCmProps) {
 				mintV2(umi, {
 					candyMachine: candyMachine.publicKey,
 					nftMint,
+					payer: umi.identity,
 					collectionMint: collectionNftPublicKey,
 					collectionUpdateAuthority: collectionNftUpdateAuthority,
 					tokenStandard: candyMachine.tokenStandard,
@@ -119,6 +120,12 @@ export async function createCandyMachine(props: CreateCandyMachineProps) {
 		sellerFeeBasisPoints: percentAmount(sellerFeeBasisPoint, 2), // 9.99%
 		itemsAvailable: totalItems,
 		creators,
+		guards: {
+			solPayment: some({
+				lamports: sol(1.5),
+				destination: umi.identity.publicKey,
+			}),
+		},
 		configLineSettings: some({
 			prefixName: config?.prefixName || "",
 			nameLength: config?.nameLength || 32,
@@ -136,25 +143,24 @@ export async function createCandyMachine(props: CreateCandyMachineProps) {
 
 interface UploadJsonFileProps {
 	image: File[]; //the browser always takes file input in an array
-	audioFile: File[];
 	umi: Umi;
 	name: string;
 	description: string;
 }
 export const uploadJsonFile = async (props: UploadJsonFileProps) => {
-	const { image, umi, name, description, audioFile } = props;
+	const { image, umi, name, description } = props;
 	//use irys uploader in umi provider
 	const file = await createGenericFileFromBrowserFile(image[0]);
-	const audiofile = await createGenericFileFromBrowserFile(audioFile[0]);
-	const [fileUri, audioUri] = await umi.uploader.upload([file, audiofile]);
+	const [fileUri] = await umi.uploader.upload([file]);
 
 	const jsonUri = await umi.uploader.uploadJson({
 		name,
 		description,
+		image: fileUri,
 	});
-	console.log("uploaded assets", fileUri, audioUri);
+	console.log("uploaded assets", fileUri);
 
-	return { jsonUri, fileUri, audioUri };
+	return { jsonUri, fileUri };
 };
 
 export interface CandyMachineItem {
@@ -162,7 +168,7 @@ export interface CandyMachineItem {
 	uri: string;
 }
 
-interface AddItemsToCandyMachinePropsWithUri {
+interface AddItemsToCandyMachineWithUriProps {
 	umi: Umi;
 	candyMachine: CandyMachine;
 	index?: number;
@@ -170,9 +176,11 @@ interface AddItemsToCandyMachinePropsWithUri {
 }
 
 export const addItemsToCandyMachineWithUri = async (
-	props: AddItemsToCandyMachineProps
+	props: AddItemsToCandyMachineWithUriProps
 ) => {
 	const { umi, candyMachine, index, configLines } = props;
+	console.log(umi.rpc.getEndpoint());
+
 	const { signature, result } = await addConfigLines(umi, {
 		candyMachine: candyMachine.publicKey,
 		index: index ? index : candyMachine.itemsLoaded,
@@ -182,7 +190,7 @@ export const addItemsToCandyMachineWithUri = async (
 	return { signature, result };
 };
 
-interface AddItemsToCandyMachinePropsWithUri {
+interface AddItemsToCandyMachineProps {
 	items: number;
 	umi: Umi;
 	candyMachine: CandyMachine;
@@ -190,7 +198,7 @@ interface AddItemsToCandyMachinePropsWithUri {
 	configLines: CandyMachineItem[];
 }
 
-export const addItemsToCandyMachineasync = async (
+export const addItemsToCandyMachine = async (
 	props: AddItemsToCandyMachineProps
 ) => {
 	const { umi, candyMachine, index, configLines } = props;

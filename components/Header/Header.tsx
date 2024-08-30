@@ -16,7 +16,7 @@ export function Header({
 			</Link>
 			<div className="flex flex-row gap-5 h-full">
 				<WalletMultiButton />
-				<Link href={"/create"} className="btn btn-accent">
+				<Link href={"/create"} className="btn btn-primary">
 					Create
 				</Link>
 				<select

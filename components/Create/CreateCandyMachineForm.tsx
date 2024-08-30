@@ -26,10 +26,10 @@ import { validatePubkey } from "@/lib/form";
 import { PublicKey } from "@metaplex-foundation/umi";
 import Image from "next/image";
 import { addCandyMachine } from "@/app/actions/candymachineActions";
+import AddItemsForm from "./AddItemForm";
 
 export interface CreateFormValues {
 	artistDisplayName: string;
-	audioFile: File;
 	collectionNftImage: File;
 	sellerFeeBasisPoints: number;
 	collectionName: string;
@@ -46,7 +46,6 @@ interface CollectionNftDetails {
 	collectionMint: PublicKey;
 	collectionJsonUri: string;
 	image: string;
-	audioUri: string;
 }
 
 const CreateCandyMachineForm = () => {
@@ -78,7 +77,6 @@ const CreateCandyMachineForm = () => {
 	const createCandyMachineHandler = async () => {
 		const {
 			collectionNftImage,
-			audioFile,
 			collectionName,
 			artistDisplayName,
 			sellerFeeBasisPoints,
@@ -88,13 +86,8 @@ const CreateCandyMachineForm = () => {
 		console.log(collectionNftImage);
 
 		try {
-			const {
-				jsonUri: collectionJsonUri,
-				audioUri,
-				fileUri,
-			} = await uploadJsonFile({
+			const { jsonUri: collectionJsonUri, fileUri } = await uploadJsonFile({
 				//@ts-ignore
-				audioFile,
 				description: "this is #1",
 				//@ts-ignore
 				image: collectionNftImage,
@@ -114,7 +107,6 @@ const CreateCandyMachineForm = () => {
 				collectionMint: collectionMint.publicKey,
 				collectionJsonUri,
 				image: fileUri,
-				audioUri,
 			});
 
 			const creator: Creator = {
@@ -145,7 +137,7 @@ const CreateCandyMachineForm = () => {
 			if (!candyMachine.publicKey)
 				throw new Error("could not get candy machine's address");
 			try {
-				addCandyMachine({
+				const _cm = await addCandyMachine({
 					address: candyMachine.publicKey!,
 					artistName: artistDisplayName,
 					machineName: collectionName,
@@ -157,21 +149,11 @@ const CreateCandyMachineForm = () => {
 				});
 			}
 
-			try {
-				setLoadingMessage("fetching candyMachine")
-				const fetchedCandyMachine = await fetchCandyMachine(umi,candyMachine.publicKey)
-				addItemsToCandyMachine({
-					candyMachine,
-					configLines:
-				})
-			} catch (error) {
-				
-			}
 			toast.toast({
 				title: "successfully made candymachine at address: ",
 				description: candyMachine.publicKey.toString(),
 			});
-
+			setLoadingMessage("");
 			try {
 			} catch (error) {}
 		} catch (error) {
@@ -204,160 +186,149 @@ const CreateCandyMachineForm = () => {
 	}, [CmId, umi]);
 
 	return (
-		<form
-			onSubmit={handleSubmit(createCandyMachineHandler)}
-			className="space-y-4"
-		>
-			<div>
-				<Label htmlFor="ArtistDisplayName">Artist Display Name</Label>
-				<Input
-					{...register("artistDisplayName", { required: true })}
-					id="ArtistDisplayName"
-				/>
-				{errors.artistDisplayName && <span>This field is required</span>}
-			</div>
-			<div>
-				<Label htmlFor="collectionName">Collection Name</Label>
-				<Input {...register("collectionName", { required: true })} id="name" />
-				{errors.collectionName && <span>This field is required</span>}
-			</div>
-			<div>
-				<Label htmlFor="sellerFeeBasisPoints">seller Fee Basis Points</Label>
-				<Input
-					{...register("sellerFeeBasisPoints", { required: true })}
-					id="uri"
-					type="number"
-				/>
-				{errors.sellerFeeBasisPoints && <span>This field is required</span>}
-			</div>
-			<div>
-				<Label htmlFor="totalItems">Total Items</Label>
-				<Input {...register("totalItems", { required: true })} id="owner" />
-				{errors.totalItems && <span>This field is required</span>}
-			</div>
-			{/* Conditionally render fields based on the collection type */}
-			<div>
-				<Label htmlFor="audioFile">Audio File</Label>
-				<Input
-					{...register("audioFile", { required: true })}
-					id="audioFile"
-					type="file"
-					className="file:bg-primary file:px-2 file:rounded-full file:text-center file:hover:cursor-pointer file:hover:scale-105 file:transition-all file:duration-300"
-				/>
-				{errors.audioFile && <span>This field is required</span>}
-			</div>
-			<div>
-				<Label htmlFor="">collectionNftImage</Label>
-				<Input
-					{...register("collectionNftImage", { required: true })}
-					id="collectionNftImage"
-					type="file"
-					className="file:bg-primary file:px-2 file:rounded-full file:text-center file:hover:cursor-pointer file:hover:scale-105 file:transition-all file:duration-300"
-				/>
-				{errors.collectionNftImage && <span>This field is required</span>}
-			</div>
-			<div className="flex flex-row gap-5 items-center ">
-				<Button
-					type="submit"
-					className=" bg-blue-500 text-white py-2 px-4 rounded"
-					disabled={!isValid || loading}
-				>
-					Create Candy Machine
-				</Button>
-				<div className="flex flex-row gap-10">
-					{loading && <Rings />}
-					{loadingMessage && loadingMessage}
+		<>
+			<form
+				onSubmit={handleSubmit(createCandyMachineHandler)}
+				className="space-y-4"
+			>
+				<div>
+					<Label htmlFor="ArtistDisplayName">Artist Display Name</Label>
+					<Input
+						{...register("artistDisplayName", { required: true })}
+						id="ArtistDisplayName"
+					/>
+					{errors.artistDisplayName && <span>This field is required</span>}
 				</div>
-			</div>{" "}
-			<div className="grid grid-cols-1 lg:grid-cols-2  gap-3">
-				{CMDetails && (
-					<div className="flex flex-col gap-5">
-						<span className="text-2xl font-bold text-secondary">
-							Candy Machine Details
-						</span>
-						<div className="flex flex-col">
-							<span className="text-primary font-semibold">Public Key</span>
-							<div
-								className="btn btn-outline btn-ghost"
-								onClick={() => {
-									router.push(
-										`https://explorer.solana.com/address/${CMDetails.publicKey}?cluster=devnet`
-									);
-								}}
-							>
-								{CMDetails.publicKey}
-							</div>
-						</div>
-						<div className="flex flex-col">
-							<span className="text-primary font-semibold">Authority</span>
-							<div className="btn btn-outline btn-ghost">
-								{CMDetails.authority}
-							</div>
-						</div>
-						<div className="flex flex-col">
-							<span className="text-primary font-semibold">
-								Collection Nft minted address
-							</span>
-							<div className="btn btn-outline btn-ghost">
-								{CMDetails.collectionMint}
-							</div>
-						</div>
-						<div className="flex flex-col">
-							<span className="text-primary font-semibold">Loaded Items</span>
-							<div className="btn btn-outline btn-ghost">
-								{CMDetails.loadedItems}
-							</div>
-						</div>
-						<div className="flex flex-col">
-							<span className="text-primary font-semibold">Total Items</span>
-							<div className="btn btn-outline btn-ghost">
-								{CMDetails.totalItems.length}
-							</div>
-						</div>
+				<div>
+					<Label htmlFor="collectionName">Collection Name</Label>
+					<Input
+						{...register("collectionName", { required: true })}
+						id="name"
+					/>
+					{errors.collectionName && <span>This field is required</span>}
+				</div>
+				<div>
+					<Label htmlFor="sellerFeeBasisPoints">seller Fee Basis Points</Label>
+					<Input
+						{...register("sellerFeeBasisPoints", { required: true })}
+						id="uri"
+						type="number"
+					/>
+					{errors.sellerFeeBasisPoints && <span>This field is required</span>}
+				</div>
+				<div>
+					<Label htmlFor="totalItems">Total Items</Label>
+					<Input {...register("totalItems", { required: true })} id="owner" />
+					{errors.totalItems && <span>This field is required</span>}
+				</div>
+				<div>
+					<Label htmlFor="">collectionNftImage</Label>
+					<Input
+						{...register("collectionNftImage", { required: true })}
+						id="collectionNftImage"
+						type="file"
+						className="file:bg-primary file:px-2 file:rounded-full file:text-center file:hover:cursor-pointer file:hover:scale-105 file:transition-all file:duration-300"
+					/>
+					{errors.collectionNftImage && <span>This field is required</span>}
+				</div>
+				<div className="flex flex-row gap-5 items-center ">
+					<Button
+						type="submit"
+						className=" bg-blue-500 text-white py-2 px-4 rounded"
+						disabled={!isValid || loading}
+					>
+						Create Candy Machine
+					</Button>
+					<div className="flex flex-row gap-10">
+						{loading && <Rings />}
+						{loadingMessage && loadingMessage}
 					</div>
-				)}
-				{collectionNFt && (
-					<div className="flex flex-col gap-5 ">
-						<span className="text-2xl font-bold text-secondary">
-							Collection NFT Details
-						</span>
-						<div className="flex flex-col ">
-							<span className="font-semibold text-primary ">Public Key</span>
-							<div
-								className="btn btn-outline btn-ghost"
-								onClick={() => {
-									router.push(
-										`https://explorer.solana.com/address/${collectionNFt.collectionMint}?cluster=devnet`
-									);
-								}}
-							>
-								{collectionNFt.collectionMint}
-							</div>
-						</div>
-						<div className="flex flex-col ">
-							<span className="font-semibold text-primary ">
-								collectionJsonUri
+				</div>{" "}
+				<div className="grid grid-cols-1 lg:grid-cols-2  gap-3">
+					{CMDetails && (
+						<div className="flex flex-col gap-5">
+							<span className="text-2xl font-bold text-secondary">
+								Candy Machine Details
 							</span>
-							<div className="btn btn-outline btn-ghost">
-								{collectionNFt.collectionJsonUri}
+							<div className="flex flex-col">
+								<span className="text-primary font-semibold">Public Key</span>
+								<div
+									className="btn btn-outline btn-ghost"
+									onClick={() => {
+										router.push(
+											`https://explorer.solana.com/address/${CMDetails.publicKey}?cluster=devnet`
+										);
+									}}
+								>
+									{CMDetails.publicKey}
+								</div>
+							</div>
+							<div className="flex flex-col">
+								<span className="text-primary font-semibold">Authority</span>
+								<div className="btn btn-outline btn-ghost">
+									{CMDetails.authority}
+								</div>
+							</div>
+							<div className="flex flex-col">
+								<span className="text-primary font-semibold">
+									Collection Nft minted address
+								</span>
+								<div className="btn btn-outline btn-ghost">
+									{CMDetails.collectionMint}
+								</div>
+							</div>
+							<div className="flex flex-col">
+								<span className="text-primary font-semibold">Loaded Items</span>
+								<div className="btn btn-outline btn-ghost">
+									{CMDetails.loadedItems}
+								</div>
+							</div>
+							<div className="flex flex-col">
+								<span className="text-primary font-semibold">Total Items</span>
+								<div className="btn btn-outline btn-ghost">
+									{CMDetails.totalItems.length}
+								</div>
 							</div>
 						</div>
-						<div className="flex flex-col ">
-							<span className="font-semibold text-primary ">Image Uri</span>
-							<div className="btn btn-outline btn-ghost">
-								{collectionNFt.image}
+					)}
+					{collectionNFt && (
+						<div className="flex flex-col gap-5 ">
+							<span className="text-2xl font-bold text-secondary">
+								Collection NFT Details
+							</span>
+							<div className="flex flex-col ">
+								<span className="font-semibold text-primary ">Public Key</span>
+								<div
+									className="btn btn-outline btn-ghost"
+									onClick={() => {
+										router.push(
+											`https://explorer.solana.com/address/${collectionNFt.collectionMint}?cluster=devnet`
+										);
+									}}
+								>
+									{collectionNFt.collectionMint}
+								</div>
+							</div>
+							<div className="flex flex-col ">
+								<span className="font-semibold text-primary ">
+									collectionJsonUri
+								</span>
+								<div className="btn btn-outline btn-ghost">
+									{collectionNFt.collectionJsonUri}
+								</div>
+							</div>
+							<div className="flex flex-col ">
+								<span className="font-semibold text-primary ">Image Uri</span>
+								<div className="btn btn-outline btn-ghost">
+									{collectionNFt.image}
+								</div>
 							</div>
 						</div>
-						<div className="flex flex-col ">
-							<span className="font-semibold text-primary ">Audio Uri</span>
-							<div className="btn btn-outline btn-ghost">
-								{collectionNFt.audioUri}
-							</div>
-						</div>
-					</div>
-				)}
-			</div>
-		</form>
+					)}
+				</div>
+			</form>
+			<AddItemsForm CmPubKey={CmId} />
+		</>
 	);
 };
 

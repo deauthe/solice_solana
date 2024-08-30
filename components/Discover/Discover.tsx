@@ -20,6 +20,8 @@ export default function Discover() {
 	const umi = useUmi();
 	const fetchCandyMachines = async () => {
 		const candyMachines = await fetchAllCandyMachinesFromDb();
+		console.log(candyMachines.length);
+
 		// Fetch the candy machine and their associated NFT metadata in parallel
 		const nfts: (NftCardProps | null)[] = await Promise.all(
 			candyMachines.map(async (cm, i) => {
@@ -60,6 +62,7 @@ export default function Discover() {
 				} as NftCardProps;
 			})
 		);
+		console.log("discover :", nfts);
 
 		// Filter out any null results and update the state
 		setNfts(nfts.filter((nft): nft is NftCardProps => nft !== null));
@@ -71,6 +74,9 @@ export default function Discover() {
 
 	return (
 		<div className="w-full h-full p-4 ">
+			<h1 className="text-4xl font-extrabold mb-10 tracking-tight text-center text-primary">
+				Get licenses
+			</h1>
 			{!nfts || nfts.length == 0 ? (
 				<TrackGallery nfts={staticTracks} />
 			) : (

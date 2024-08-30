@@ -10,7 +10,7 @@ datasource db {
 model CandyMachine {
   address     String   @unique
   id          Int      @id @default(autoincrement())
-  wallet      String   @unique
+  wallet      String   
   machineName String
   artistName  String
   createdAt   DateTime @default(now())
