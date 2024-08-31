@@ -21,6 +21,7 @@ import { Button } from "../ui/button";
 import { DigitalAsset } from "@metaplex-foundation/mpl-token-metadata";
 import { useToast } from "../ui/use-toast";
 import {
+	CandyGuard,
 	CandyMachine,
 	safeFetchCandyGuard,
 } from "@metaplex-foundation/mpl-candy-machine";
@@ -34,6 +35,7 @@ export default function NftCard(props: NftCardProps) {
 	const [loading, setLoading] = useState<boolean>();
 	const [image, setImage] = useState<string>();
 	const [remainingItems, setRemItems] = useState<number>(0);
+	const [candyGuard, setGuard] = useState<CandyGuard>();
 	const umi = useUmi();
 	const fetchImage = async () => {
 		setLoading(true);
@@ -102,11 +104,18 @@ export default function NftCard(props: NftCardProps) {
 			<div className="card-body">
 				<div className="flex flex-row justify-between">
 					<h2 className="card-title uppercase font-bold">{title}</h2>
-					<CopyToClipboard text={candyMachine.publicKey}>
-						<button className="btn btn-ghost ">
-							<IconCopy />
-						</button>
-					</CopyToClipboard>
+					<div className="">
+						<CopyToClipboard text={candyMachine.publicKey}>
+							<button className="btn btn-ghost ">
+								cm <IconCopy />
+							</button>
+						</CopyToClipboard>
+						<CopyToClipboard text={candyGuard?.publicKey || "undefined"}>
+							<button className="btn btn-ghost ">
+								guard: <IconCopy />
+							</button>
+						</CopyToClipboard>
+					</div>
 				</div>
 				<p className="text-xs opacity-60">{artist}</p>
 				<p className="text-xs opacity-50">remaining items : {remainingItems}</p>
