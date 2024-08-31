@@ -21,12 +21,17 @@ Solice introduces a completely transparent way for everyone to sell, buy and ver
 ![image](/draw.png)
 
 ## Future expansion
+<img width="1368" alt="Screenshot 2024-08-31 at 11 16 04 AM" src="https://github.com/user-attachments/assets/ce7de3ae-aeac-4dd1-82bb-fcc954efa9f9">
+<img width="1462" alt="Screenshot 2024-08-31 at 11 16 31 AM" src="https://github.com/user-attachments/assets/2de9f290-c71d-48e2-8a41-127277a66e10">
+<img width="951" alt="Screenshot 2024-08-31 at 10 59 20 AM" src="https://github.com/user-attachments/assets/154eced0-fe61-432a-8c44-0b0002e43568">
 
 - add multiple options for copyrights from varying time lengths and varying scopes of usage with each option having a minting price of its own
 - allowing users to use the same system for audio. This would make much more traction for the common public as resolving a copyright issue for an audio on a platform like youtube would be as simple as proving that "you have the access to one of the wallets that own the nfts from a particular candymachine with some particular settings"
 - - This does come with a challenge though. Publishing media on decentralised storage solutions may cost a lot so the audio file would be really compressed. A solution to this might be storing the signature of an audio file on a decentralised storage platform and then comparing to validate the license on a concerned 3rd party platform.
 - establish a standard library for verifying digital licenses for media on solana
 - allow artists to set up a candymachine with default items. This can be done via hidden settings in a candymachine and allows the artist to manipulate an item's metadata after they have been minted. This would allow for treasury drops for an extended license for a copyright.
+
+  
 
 # Setting Up Locally
 
