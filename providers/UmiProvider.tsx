@@ -26,7 +26,7 @@ export const UmiProvider = ({ children }: { children: ReactNode }) => {
 			.use(mplCandyMachine())
 			.use(mplTokenMetadata())
 			.use(mplToolbox())
-			.use(mockStorage());
+			.use(irysUploader());
 
 		if (wallet.connected) {
 			return u.use(walletAdapterIdentity(wallet));

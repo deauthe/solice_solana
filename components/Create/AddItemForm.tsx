@@ -1,6 +1,6 @@
 "use client";
 
-import { addItemsToCandyMachine } from "@/lib/candymachine";
+import { addItemsToCandyMachine, uploadJsonFile } from "@/lib/candymachine";
 import { useUmi } from "@/providers/useUmi";
 import { fetchCandyMachine } from "@metaplex-foundation/mpl-candy-machine";
 import { useState } from "react";
@@ -60,21 +60,25 @@ export default function AddItemsForm({ CmPubKey }: AddItemsFormProps) {
 			setLoadingMessage(
 				`adding items, candy machine length:${fetchedCandyMachine.items.length}`
 			);
+
+			const { jsonUri } = await uploadJsonFile({
+				description,
+				image: [image],
+				name,
+				umi,
+			});
+
 			await addItemsToCandyMachine({
 				candyMachine: fetchedCandyMachine,
 				configLines: [
 					{
-						name: "who who haa haa",
-						uri: "",
-					},
-					{
-						name: "who who haa haa",
-						uri: "asd",
+						name: name,
+						uri: jsonUri,
 					},
 				],
-				items: 2,
+				items: 1,
 				umi,
-				index: 0,
+				index: fetchedCandyMachine.itemsLoaded,
 			});
 			toast({
 				title: "succesfully initiated transaction",

@@ -15,8 +15,12 @@ export function Header({
 				SOLICe
 			</Link>
 			<div className="flex flex-row gap-5 h-full">
-				<WalletMultiButton />
-				<Link href={"/create"} className="btn btn-primary">
+				<WalletMultiButton className="" />
+
+				<Link
+					href={"/create"}
+					className="btn btn-ghost btn-outline border-primary"
+				>
 					Create
 				</Link>
 				<select

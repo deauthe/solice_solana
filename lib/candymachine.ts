@@ -7,20 +7,30 @@ import {
 	some,
 	createGenericFileFromBrowserFile,
 	sol,
+	SolAmount,
+	Option,
+	unwrapSome,
 } from "@metaplex-foundation/umi";
 import {
 	addConfigLines,
 	CandyMachine,
 	create,
 	Creator,
+	DefaultGuardSet,
+	DefaultGuardSetMintArgs,
 	fetchCandyGuard,
+	mintFromCandyMachineV2,
 	mintV2,
+	safeFetchCandyGuard,
+	SolPayment,
 } from "@metaplex-foundation/mpl-candy-machine";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import {
 	createNft,
+	fetchDigitalAsset,
 	TokenStandard,
 } from "@metaplex-foundation/mpl-token-metadata";
+import { errorMonitor } from "node:events";
 
 interface MintCmProps {
 	umi: Umi;
@@ -41,25 +51,56 @@ export async function mintNft(props: MintCmProps) {
 		collectionNftUpdateAuthority,
 		"hello"
 	);
-	const nftMint = generateSigner(umi);
-	try {
-		await transactionBuilder()
-			.add(setComputeUnitLimit(umi, { units: 800_000 }))
-			.add(
-				mintV2(umi, {
-					candyMachine: candyMachine.publicKey,
-					nftMint,
-					payer: umi.identity,
-					collectionMint: collectionNftPublicKey,
-					collectionUpdateAuthority: collectionNftUpdateAuthority,
-					tokenStandard: candyMachine.tokenStandard,
-				})
-			)
-			.sendAndConfirm(umi);
-		//Note that the mintV2 instruction takes care of creating the Mint and Token accounts for us by default and will set the NFT owner to the minter.
-	} catch (error) {
-		console.log(error);
+
+	const balance: SolAmount = await umi.rpc.getBalance(umi.identity.publicKey);
+	console.log("balance,", balance);
+	const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+	if (!candyMachine || !candyGuard) {
+		throw new Error(
+			"There was an error fetching the candy machine. Try refreshing your browser window."
+		);
 	}
+	const nftMint = generateSigner(umi);
+	const mintArgs: Partial<DefaultGuardSetMintArgs> = {};
+	const defaultGuards: DefaultGuardSet | undefined = candyGuard?.guards;
+	const solPaymentGuard: Option<SolPayment> | undefined =
+		defaultGuards?.solPayment;
+	if (solPaymentGuard) {
+		const solPayment: SolPayment | null = unwrapSome(solPaymentGuard);
+		if (solPayment) {
+			const treasury = solPayment.destination;
+
+			mintArgs.solPayment = some({
+				destination: treasury,
+			});
+			const lamports: SolAmount = solPayment.lamports;
+			const solCost = Number(lamports.basisPoints) / 1000000000;
+			console.log("cost of minting", solCost);
+		}
+	}
+
+	const tx = transactionBuilder()
+		.add(setComputeUnitLimit(umi, { units: 800_000 }))
+		.add(
+			mintV2(umi, {
+				candyMachine: candyMachine.publicKey,
+				nftMint,
+				payer: umi.identity,
+				collectionMint: collectionNftPublicKey,
+				collectionUpdateAuthority: collectionNftUpdateAuthority,
+				tokenStandard: candyMachine.tokenStandard,
+				mintArgs,
+			})
+		);
+	const { signature } = await tx.sendAndConfirm(umi, {
+		confirm: { commitment: "finalized" },
+		send: {
+			skipPreflight: true,
+		},
+	});
+	const nft = await fetchDigitalAsset(umi, nftMint.publicKey);
+	return { signature, nft };
+	//Note that the mintV2 instruction takes care of creating the Mint and Token accounts for us by default and will set the NFT owner to the minter.
 }
 
 interface CreateCollectionNftProps {
@@ -91,6 +132,7 @@ interface CreateCandyMachineProps {
 	tokenStandard: TokenStandard;
 	totalItems: number;
 	creators: Creator[];
+	price: number;
 	config?: {
 		prefixName?: string;
 		nameLength?: number;
@@ -110,6 +152,7 @@ export async function createCandyMachine(props: CreateCandyMachineProps) {
 		totalItems,
 		creators,
 		config,
+		price,
 	} = props;
 	const candyMachine = generateSigner(umi);
 	const Tx = await create(umi, {
@@ -122,7 +165,7 @@ export async function createCandyMachine(props: CreateCandyMachineProps) {
 		creators,
 		guards: {
 			solPayment: some({
-				lamports: sol(1.5),
+				lamports: sol(0.01),
 				destination: umi.identity.publicKey,
 			}),
 		},

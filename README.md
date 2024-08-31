@@ -14,7 +14,7 @@ Validation for copyright issues on media is slow and manual. There isn't a way f
 
 ### solution
 
-Solice introduces a completely transparent way for everyone to sell, buy and verify licenses issued for a particular media identity. This removes the need of a middleman to manage your issued or bought licenses, it's all decentralised now. Everything is visible to everyone now. With the help of metaplex and solana, solice introduces a completely custom way to license your art.
+Solice introduces a completely transparent way for everyone to sell, buy and verify licenses issued for a particular media identity. This removes the need of a middleman to manage your issued or bought licenses, it's all decentralised now. Everything is visible to everyone now. With the help of metaplex and solana, solice introduces a completely custom way to license your art. An artist is able to create his own coleciton, limit the amount of licenses produced, have different time settings and prices for the licenses.funds would reach directly in an Artist's wallet, and you're assured that you enjoy access to your asset.
 
 # Architecture
 

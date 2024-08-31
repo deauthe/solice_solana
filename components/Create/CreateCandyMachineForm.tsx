@@ -34,6 +34,7 @@ export interface CreateFormValues {
 	sellerFeeBasisPoints: number;
 	collectionName: string;
 	totalItems: number;
+	price: number;
 }
 interface CandyMachineDetails {
 	publicKey: PublicKey;
@@ -81,6 +82,7 @@ const CreateCandyMachineForm = () => {
 			artistDisplayName,
 			sellerFeeBasisPoints,
 			totalItems,
+			price,
 		} = getValues();
 		setLoading(true);
 		console.log(collectionNftImage);
@@ -123,6 +125,7 @@ const CreateCandyMachineForm = () => {
 					sellerFeeBasisPoint: sellerFeeBasisPoints,
 					tokenStandard: TokenStandard.NonFungible,
 					totalItems: totalItems,
+					price,
 					umi,
 				});
 
@@ -189,8 +192,23 @@ const CreateCandyMachineForm = () => {
 		<>
 			<form
 				onSubmit={handleSubmit(createCandyMachineHandler)}
-				className="space-y-4"
+				className="space-y-4 py-5"
 			>
+				<h1 className="text-2xl text-left font-extrabold uppercase tracking-tight">
+					Create Collection
+				</h1>
+				<p className="opacity-60 pr-20 text-xs">
+					The amount of items suggest how many licenses you want to give out.
+					The specifics can be set later
+				</p>
+				<div>
+					<Label htmlFor="collectionName">Collection Name</Label>
+					<Input
+						{...register("collectionName", { required: true })}
+						id="name"
+					/>
+					{errors.collectionName && <span>This field is required</span>}
+				</div>
 				<div>
 					<Label htmlFor="ArtistDisplayName">Artist Display Name</Label>
 					<Input
@@ -200,11 +218,8 @@ const CreateCandyMachineForm = () => {
 					{errors.artistDisplayName && <span>This field is required</span>}
 				</div>
 				<div>
-					<Label htmlFor="collectionName">Collection Name</Label>
-					<Input
-						{...register("collectionName", { required: true })}
-						id="name"
-					/>
+					<Label htmlFor="price">Price in Sol</Label>
+					<Input {...register("price", { required: true })} id="name" />
 					{errors.collectionName && <span>This field is required</span>}
 				</div>
 				<div>

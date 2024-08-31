@@ -3,9 +3,7 @@
 "use server";
 
 import { PublicKey } from "@metaplex-foundation/umi";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 interface AddCandymachineProps {
 	address: PublicKey;

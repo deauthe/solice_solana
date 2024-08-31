@@ -1,7 +1,6 @@
 "use client";
 import { fetchAllCandyMachinesFromDb } from "@/app/actions/candymachineActions";
 import TrackGallery from "../Gallery/Gallery";
-import { staticTracks } from "./staticTracks";
 import {
 	CandyMachine,
 	fetchAllCandyMachine,
@@ -9,12 +8,11 @@ import {
 } from "@metaplex-foundation/mpl-candy-machine";
 import { useEffect, useState } from "react";
 import { useUmi } from "@/providers/useUmi";
-import { validatePubkey } from "@/lib/form";
-import { publicKey, PublicKey } from "@metaplex-foundation/umi";
+import { PublicKey } from "@metaplex-foundation/umi";
 import { NftCardProps } from "../NftCard/NftCard";
 import { fetchDigitalAsset } from "@metaplex-foundation/mpl-token-metadata";
 import { mintNft } from "@/lib/candymachine";
-
+import { ThreeDots } from "react-loading-icons";
 export default function Discover() {
 	const [nfts, setNfts] = useState<NftCardProps[]>();
 	const umi = useUmi();
@@ -39,22 +37,29 @@ export default function Discover() {
 
 				// Get the image URI from the metadata
 				const imageUri = collectionNft.metadata.uri;
-
-				const action = () => {
-					console.log("somethings running");
-
-					mintNft({
+				const action = async () => {
+					const mint = await mintNft({
 						candyMachine: fetchedCandyMachine,
 						collectionNftPublicKey: collectionNft.metadata.mint,
 						collectionNftUpdateAuthority:
 							collectionNft.metadata.updateAuthority,
 						umi,
 					});
+					console.log("reached past minting");
+
+					if (mint) {
+						const nft = mint.nft;
+						const signature = mint.signature;
+						return { nft, signature };
+					} else {
+						return;
+					}
 				};
-				console.log("from", typeof action);
 
 				// Return the NFT information
 				return {
+					candyMachine: fetchedCandyMachine,
+					description: collectionNft.metadata.symbol,
 					title: cm.machineName,
 					artist: cm.artistName,
 					imageUrl: imageUri,
@@ -78,7 +83,7 @@ export default function Discover() {
 				Get licenses
 			</h1>
 			{!nfts || nfts.length == 0 ? (
-				<TrackGallery nfts={staticTracks} />
+				<ThreeDots className="mx-auto my-20" />
 			) : (
 				<TrackGallery nfts={nfts!} />
 			)}
