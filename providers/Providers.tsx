@@ -9,7 +9,7 @@ import {
 	SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, Suspense, useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
@@ -42,11 +42,11 @@ export function Providers({ children }: { children: ReactNode }) {
 		console.log("changed env to ", e);
 	};
 
-	// useEffect(() => {
-	//   if (env === 'devnet' && queryEnv !== 'devnet') {
-	//     doSetEnv('devnet');
-	//   }
-	// }, []);
+	useEffect(() => {
+		if (env === "devnet" && queryEnv !== "devnet") {
+			doSetEnv("devnet");
+		}
+	}, []);
 
 	const endpoint = useMemo(() => {
 		switch (env) {
@@ -70,7 +70,9 @@ export function Providers({ children }: { children: ReactNode }) {
 							<QueryClientProvider client={client}>
 								<ReactQueryStreamedHydration>
 									<Toaster />
-									<Header env={env} setEnv={doSetEnv} />
+									<Suspense>
+										<Header env={env} setEnv={doSetEnv} />
+									</Suspense>
 									{children}
 								</ReactQueryStreamedHydration>
 							</QueryClientProvider>
