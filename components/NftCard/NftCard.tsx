@@ -123,26 +123,38 @@ export default function NftCard(props: NftCardProps) {
 					</div>
 				</div>
 				<p className="text-xs opacity-60">{artist}</p>
-				<p className="text-xs opacity-50">remaining items : {remainingItems}</p>
+				<p
+					className={`text-xs opacity-50 ${
+						remainingItems <= 0 ? "text-warning text-opacity-75" : ""
+					}`}
+				>
+					remaining items : {remainingItems}
+				</p>
 				<p>{description}</p>
 				<h2 className="font-extralight text-xs opacity-60">Get Copyrights</h2>
 				<div className="card-actions justify-start flex flex-row">
 					<Button
-						className="btn btn-primary opacity-90"
+						className={`btn btn-primary opacity-90 ${
+							remainingItems <= 0 ? "btn-disabled" : ""
+						}`}
 						onClick={handleMint}
 						disabled={loading}
 					>
 						6 Months
 					</Button>
 					<Button
-						className="btn btn-primary opacity-95"
+						className={`btn btn-primary opacity-95 ${
+							remainingItems <= 0 ? "btn-disabled" : ""
+						}`}
 						onClick={handleMint}
 						disabled={loading}
 					>
 						1 Year
 					</Button>
 					<Button
-						className="btn btn-primary"
+						className={`btn btn-primary ${
+							remainingItems <= 0 ? "btn-disabled" : ""
+						}`}
 						onClick={handleMint}
 						disabled={loading}
 					>
