@@ -25,7 +25,7 @@ import { TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
 import { validatePubkey } from "@/lib/form";
 import { PublicKey } from "@metaplex-foundation/umi";
 import Image from "next/image";
-import { addCandyMachine } from "@/app/actions/candymachineActions";
+import { addCandyMachine } from "@/actions/candymachineActions";
 import AddItemsForm from "./AddItemForm";
 
 export interface CreateFormValues {

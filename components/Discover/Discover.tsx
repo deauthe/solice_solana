@@ -1,5 +1,5 @@
 "use client";
-import { fetchAllCandyMachinesFromDb } from "@/app/actions/candymachineActions";
+import { fetchAllCandyMachinesFromDb } from "@/actions/candymachineActions";
 import TrackGallery from "../Gallery/Gallery";
 import {
 	CandyMachine,
@@ -18,8 +18,6 @@ export default function Discover() {
 	const umi = useUmi();
 	const fetchCandyMachines = async () => {
 		const candyMachines = await fetchAllCandyMachinesFromDb();
-		console.log(candyMachines.length);
-
 		// Fetch the candy machine and their associated NFT metadata in parallel
 		const nfts: (NftCardProps | null)[] = await Promise.all(
 			candyMachines.map(async (cm, i) => {
@@ -37,24 +35,6 @@ export default function Discover() {
 
 				// Get the image URI from the metadata
 				const imageUri = collectionNft.metadata.uri;
-				const action = async () => {
-					const mint = await mintNft({
-						candyMachine: fetchedCandyMachine,
-						collectionNftPublicKey: collectionNft.metadata.mint,
-						collectionNftUpdateAuthority:
-							collectionNft.metadata.updateAuthority,
-						umi,
-					});
-					console.log("reached past minting");
-
-					if (mint) {
-						const nft = mint.nft;
-						const signature = mint.signature;
-						return { nft, signature };
-					} else {
-						return;
-					}
-				};
 
 				// Return the NFT information
 				return {
@@ -62,12 +42,10 @@ export default function Discover() {
 					description: collectionNft.metadata.symbol,
 					title: cm.machineName,
 					artist: cm.artistName,
-					imageUrl: imageUri,
-					action,
+					collectionNft: collectionNft,
 				} as NftCardProps;
 			})
 		);
-		console.log("discover :", nfts);
 
 		// Filter out any null results and update the state
 		setNfts(nfts.filter((nft): nft is NftCardProps => nft !== null));

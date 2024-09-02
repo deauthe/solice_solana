@@ -5,16 +5,10 @@ import { useEffect, useState } from "react";
 export interface NftCardProps {
 	candyMachine: CandyMachine;
 	description: string;
+	collectionNft: DigitalAsset;
 	imageUrl?: string;
 	title: string;
 	artist: string;
-	action: () => Promise<
-		| {
-				nft: DigitalAsset;
-				signature: Uint8Array;
-		  }
-		| undefined
-	>;
 }
 import { IconPlayerPlay, IconPlayerPause } from "@tabler/icons-react";
 import { Button } from "../ui/button";
@@ -29,9 +23,11 @@ import { useUmi } from "@/providers/useUmi";
 import { unwrapSome } from "@metaplex-foundation/umi";
 import CopyToClipboard from "react-copy-to-clipboard";
 import Rings from "react-loading-icons/dist/esm/components/rings";
+import { mintNft } from "@/lib/candymachine";
 export default function NftCard(props: NftCardProps) {
 	const { toast } = useToast();
-	const { imageUrl, title, action, description, artist, candyMachine } = props;
+	const { imageUrl, title, description, artist, candyMachine, collectionNft } =
+		props;
 	const [loading, setLoading] = useState<boolean>();
 	const [image, setImage] = useState<string>();
 	const [remainingItems, setRemItems] = useState<number>(0);
@@ -45,10 +41,10 @@ export default function NftCard(props: NftCardProps) {
 			console.log("response", response);
 			//@ts-ignore
 			setImage(response.image);
-			const candyGuard = await safeFetchCandyGuard(
-				umi,
-				candyMachine.mintAuthority
-			);
+			// const candyGuard = await safeFetchCandyGuard(
+			// 	umi,
+			// 	candyMachine.mintAuthority
+			// );
 			setRemItems(
 				candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed)
 			);
@@ -65,30 +61,38 @@ export default function NftCard(props: NftCardProps) {
 
 	const handleMint = async () => {
 		setLoading(true);
-		if (!action) {
+		if (remainingItems <= 0) {
 			toast({
-				title: "Failed to mint",
-				description: `check wallet balance
-				validate that you're not minting from the account that is the owner authority of the candymachine`,
+				title: "no more licenses for this are availble",
 			});
-			setLoading(false);
-			return;
-		} else {
-			console.log("reached here");
+		}
 
-			try {
-				const mint = await action();
-				if (mint) {
-					toast({
-						title: `nft minted, mint address : ${mint.nft.publicKey}`,
-						description: `transaction signature : ${mint.signature}`,
-					});
-				}
-			} catch (error) {
-				console.log(error);
-			} finally {
-				setLoading(false);
+		console.log("reached here");
+
+		try {
+			const mint = await mintNft({
+				candyMachine: candyMachine,
+				collectionNftPublicKey: collectionNft.metadata.mint,
+				collectionNftUpdateAuthority: collectionNft.metadata.updateAuthority,
+				umi,
+			});
+			console.log("reached past minting");
+
+			if (mint) {
+				toast({
+					title: `nft minted, mint address : ${mint.nft.publicKey}`,
+					description: `transaction signature : ${mint.signature}`,
+				});
 			}
+		} catch (error) {
+			console.log(error);
+			toast({
+				title: `nft mint failed`,
+				description: `check wallet balance
+					validate that you're not minting from the account that is the owner authority of the candymachine`,
+			});
+		} finally {
+			setLoading(false);
 		}
 	};
 

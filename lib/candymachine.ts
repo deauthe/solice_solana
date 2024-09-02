@@ -24,7 +24,10 @@ import {
 	safeFetchCandyGuard,
 	SolPayment,
 } from "@metaplex-foundation/mpl-candy-machine";
-import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
+import {
+	setComputeUnitLimit,
+	setComputeUnitPrice,
+} from "@metaplex-foundation/mpl-toolbox";
 import {
 	createNft,
 	fetchDigitalAsset,
@@ -80,7 +83,8 @@ export async function mintNft(props: MintCmProps) {
 	}
 
 	const tx = transactionBuilder()
-		.add(setComputeUnitLimit(umi, { units: 800_000 }))
+		.add(setComputeUnitLimit(umi, { units: 100_000 }))
+		.add(setComputeUnitPrice(umi, { microLamports: BigInt(100000) }))
 		.add(
 			mintV2(umi, {
 				candyMachine: candyMachine.publicKey,
@@ -92,14 +96,21 @@ export async function mintNft(props: MintCmProps) {
 				mintArgs,
 			})
 		);
-	const { signature } = await tx.sendAndConfirm(umi, {
-		confirm: { commitment: "finalized" },
-		send: {
-			skipPreflight: true,
-		},
-	});
-	const nft = await fetchDigitalAsset(umi, nftMint.publicKey);
-	return { signature, nft };
+
+	try {
+		const { signature } = await tx.sendAndConfirm(umi, {
+			send: {
+				skipPreflight: true,
+			},
+		});
+		const nft = await fetchDigitalAsset(umi, nftMint.publicKey);
+		console.log(signature);
+
+		return { signature, nft };
+	} catch (error) {
+		throw new Error(error);
+	}
+
 	//Note that the mintV2 instruction takes care of creating the Mint and Token accounts for us by default and will set the NFT owner to the minter.
 }
 

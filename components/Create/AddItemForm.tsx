@@ -63,7 +63,8 @@ export default function AddItemsForm({ CmPubKey }: AddItemsFormProps) {
 
 			const { jsonUri } = await uploadJsonFile({
 				description,
-				image: [image],
+				//@ts-ignore
+				image: image,
 				name,
 				umi,
 			});

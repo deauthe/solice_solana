@@ -7,7 +7,6 @@ export interface GalleryProps {
 
 export default function Gallery(props: GalleryProps) {
 	const { nfts } = props;
-	console.log(nfts);
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
