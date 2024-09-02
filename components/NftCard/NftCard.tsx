@@ -26,8 +26,9 @@ import Rings from "react-loading-icons/dist/esm/components/rings";
 import { mintNft } from "@/lib/candymachine";
 export default function NftCard(props: NftCardProps) {
 	const { toast } = useToast();
-	const { imageUrl, title, description, artist, candyMachine, collectionNft } =
-		props;
+	const { title, artist, candyMachine, collectionNft } = props;
+	const imageUrl = collectionNft.metadata.uri;
+	const description = collectionNft.metadata.symbol;
 	const [loading, setLoading] = useState<boolean>();
 	const [image, setImage] = useState<string>();
 	const [remainingItems, setRemItems] = useState<number>(0);
@@ -124,13 +125,28 @@ export default function NftCard(props: NftCardProps) {
 				<p className="text-xs opacity-60">{artist}</p>
 				<p className="text-xs opacity-50">remaining items : {remainingItems}</p>
 				<p>{description}</p>
-				<div className="card-actions justify-start flex flex-col">
+				<h2 className="font-extralight text-xs opacity-60">Get Copyrights</h2>
+				<div className="card-actions justify-start flex flex-row">
+					<Button
+						className="btn btn-primary opacity-90"
+						onClick={handleMint}
+						disabled={loading}
+					>
+						6 Months
+					</Button>
+					<Button
+						className="btn btn-primary opacity-95"
+						onClick={handleMint}
+						disabled={loading}
+					>
+						1 Year
+					</Button>
 					<Button
 						className="btn btn-primary"
 						onClick={handleMint}
 						disabled={loading}
 					>
-						License For Use
+						Lifetime
 					</Button>
 				</div>
 				{loading && <Rings className="mx-auto my-5" />}

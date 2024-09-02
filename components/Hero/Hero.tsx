@@ -23,7 +23,7 @@ const Hero = () => {
 						<Link href={"/create"} className="btn btn-secondary rounded-full ">
 							Create
 						</Link>
-						<Link href={"/#buy"} className="btn btn-accent rounded-full">
+						<Link href={"/"} className="btn btn-accent rounded-full">
 							Buy
 						</Link>
 					</div>

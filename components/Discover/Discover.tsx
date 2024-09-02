@@ -33,13 +33,9 @@ export default function Discover() {
 				// Fetch the digital asset (NFT) associated with the collection mint
 				const collectionNft = await fetchDigitalAsset(umi, collectionMint);
 
-				// Get the image URI from the metadata
-				const imageUri = collectionNft.metadata.uri;
-
 				// Return the NFT information
 				return {
 					candyMachine: fetchedCandyMachine,
-					description: collectionNft.metadata.symbol,
 					title: cm.machineName,
 					artist: cm.artistName,
 					collectionNft: collectionNft,
